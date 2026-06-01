@@ -13,10 +13,10 @@ class Database
     {
         if (self::$instance === null) {
             $host    = getenv('DB_HOST') ?: '127.0.0.1';
-            $port    = getenv('DB_PORT') ?: '8889'; // MAMP default; change to 3306 for Homebrew/prod
-            $dbname  = getenv('DB_NAME') ?: 'njosa_alumni';
-            $user    = getenv('DB_USER') ?: 'root';
-            $pass    = getenv('DB_PASS') ?: 'root'; // MAMP default password
+            $port    = getenv('DB_PORT') ?: '3306'; // MAMP default; change to 3306 for Homebrew/prod
+            $dbname  = getenv('DB_NAME') ?: 'u189877836_juaben_db';
+            $user    = getenv('DB_USER') ?: 'u189877836_jauben_user';
+            $pass    = getenv('DB_PASS') ?: 'Queenie@3608!@#.'; // MAMP default password
 
             $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
 

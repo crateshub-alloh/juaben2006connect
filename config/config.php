@@ -5,8 +5,8 @@
 
 define('APP_NAME',    'Juaben2006 Connect');
 define('APP_VERSION', '1.0.0');
-define('APP_URL',     getenv('APP_URL') ?: 'http://localhost:8888/alumni');
-define('APP_ENV',     getenv('APP_ENV') ?: 'development'); // development | production
+define('APP_URL',     getenv('APP_URL') ?: 'https://juaben2006connect.com');
+define('APP_ENV',     getenv('APP_ENV') ?: 'production'); // development | production
 
 // Paths
 define('ROOT_PATH',       dirname(__DIR__));
