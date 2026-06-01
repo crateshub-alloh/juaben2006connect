@@ -1,0 +1,32 @@
+# PHP
+vendor/
+composer.lock
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Builds / archives
+*.zip
+*.tar.gz
+
+# Logs
+*.log
+
+# MAMP
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
