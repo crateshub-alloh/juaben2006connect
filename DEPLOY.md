@@ -4,13 +4,10 @@ This project includes a GitHub Actions workflow that deploys the repository to y
 
 Steps to enable continuous deploy:
 
-1. Create a GitHub repository and push this project to it.
+1. Create a GitHub repository named `juaben2006connect`, then connect and push this project to it:
    ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
    git branch -M main
-   git remote add origin https://github.com/youruser/yourrepo.git
+   git remote add origin https://github.com/<your-github-username>/juaben2006connect.git
    git push -u origin main
    ```
 
