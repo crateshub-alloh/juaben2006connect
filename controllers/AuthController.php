@@ -50,6 +50,11 @@ class AuthController
         $redirect = $_SESSION['redirect_after_login'] ?? null;
         unset($_SESSION['redirect_after_login']);
 
+        $next = sanitize_input($_POST['next'] ?? '');
+        if (!$redirect && $next && substr($next, 0, 1) === '/') {
+            $redirect = $next;
+        }
+
         redirect($redirect ?: $this->dashboardPath((int)$user['role_id']));
     }
 
@@ -75,6 +80,14 @@ class AuthController
         if ($password !== $confirm)                        $errors[] = 'Passwords do not match.';
         if (empty($firstName))                             $errors[] = 'First name is required.';
         if (empty($lastName))                              $errors[] = 'Last name is required.';
+        if (empty($_POST['phone'] ?? ''))                  $errors[] = 'Phone number is required.';
+        if (empty($_POST['occupation'] ?? ''))             $errors[] = 'Occupation is required.';
+        if (empty($_POST['employer'] ?? ''))               $errors[] = 'Employer is required.';
+        if (empty($_POST['city'] ?? ''))                   $errors[] = 'City is required.';
+        if (empty($_POST['country'] ?? ''))                $errors[] = 'Country is required.';
+        if (empty($_POST['house'] ?? ''))                  $errors[] = 'House selection is required.';
+        if (empty($_POST['agree'] ?? ''))                  $errors[] = 'You must agree to the Terms of Service and Privacy Policy.';
+        if (empty($_FILES['avatar']['tmp_name']))          $errors[] = 'Please upload your photo.';
         if ($this->userModel->findByEmail($email))         $errors[] = 'Email address already registered.';
 
         if ($errors) {
@@ -84,14 +97,11 @@ class AuthController
                 'firstName' => $firstName,
                 'lastName' => $lastName,
                 'phone' => sanitize_input($_POST['phone'] ?? ''),
-                'graduation_year' => sanitize_input($_POST['graduation_year'] ?? ''),
-                'degree' => sanitize_input($_POST['degree'] ?? ''),
-                'department' => sanitize_input($_POST['department'] ?? ''),
                 'occupation' => sanitize_input($_POST['occupation'] ?? ''),
                 'employer' => sanitize_input($_POST['employer'] ?? ''),
                 'city' => sanitize_input($_POST['city'] ?? ''),
                 'country' => sanitize_input($_POST['country'] ?? ''),
-                'membership_year' => sanitize_input($_POST['membership_year'] ?? ''),
+                'house' => sanitize_input($_POST['house'] ?? ''),
             ];
             redirect('/register');
         }
@@ -105,18 +115,28 @@ class AuthController
             'verify_token' => $token,
         ]);
 
-        // Save optional profile fields submitted at registration
+        // Auto-activate on local development (no email sending)
+        if (APP_ENV === 'development') {
+            $this->userModel->activateUser((int)$userId);
+        } else {
+            // Production: send email verification
+            $link = APP_URL . '/verify-email?token=' . $token;
+            $html = "
+                <h2>Welcome to NJOSA Alumni Portal</h2>
+                <p>Hi {$firstName}, click the link below to verify your email and access the members page:</p>
+                <p><a href='{$link}'>Verify your email and continue to members</a></p>
+                <p>If you did not create an account, ignore this email.</p>
+            ";
+            send_mail($email, 'Verify your NJOSA Alumni Portal account', $html);
+        }
         $profileFields = [
             'phone' => sanitize_input($_POST['phone'] ?? ''),
-            'graduation_year' => sanitize_input($_POST['graduation_year'] ?? ''),
-            'degree' => sanitize_input($_POST['degree'] ?? ''),
-            'department' => sanitize_input($_POST['department'] ?? ''),
             'occupation' => sanitize_input($_POST['occupation'] ?? ''),
             'employer' => sanitize_input($_POST['employer'] ?? ''),
             'city' => sanitize_input($_POST['city'] ?? ''),
             'state' => sanitize_input($_POST['state'] ?? ''),
             'country' => sanitize_input($_POST['country'] ?? ''),
-            'membership_year' => sanitize_input($_POST['membership_year'] ?? ''),
+            'house' => sanitize_input($_POST['house'] ?? ''),
         ];
 
         // Update profile row
@@ -137,27 +157,19 @@ class AuthController
             }
         }
 
-        $link = APP_URL . '/verify-email?token=' . $token;
-        $html = "
-            <h2>Welcome to NJOSA Alumni Portal</h2>
-            <p>Hi {$firstName}, please verify your email by clicking the link below:</p>
-            <p><a href='{$link}'>Verify Email Address</a></p>
-            <p>If you did not create an account, ignore this email.</p>
-        ";
-        send_mail($email, 'Verify your NJOSA Alumni Portal account', $html);
-
-        flash('success', 'Account created! Please check your email to verify.', 'success');
-        redirect('/login');
+        redirect('/registration-success');
     }
 
     public function verifyEmail(): void
     {
         $token = sanitize_input($_GET['token'] ?? '');
-        if ($this->userModel->verifyEmail($token)) {
-            flash('success', 'Email verified! You can now log in.', 'success');
-        } else {
-            flash('error', 'Invalid or expired verification link.', 'error');
+        $user = $this->userModel->verifyEmail($token);
+        if ($user) {
+            flash('success', 'Email verified! You may now sign in.', 'success');
+            redirect('/login');
         }
+
+        flash('error', 'Invalid or expired verification link.', 'error');
         redirect('/login');
     }
 

@@ -33,7 +33,6 @@ include ROOT_PATH . '/components/navbar.php';
             <?php endif; ?>
             <div class="card__body">
               <h3 class="card__title"><?= h($m['first_name'] . ' ' . $m['last_name']) ?></h3>
-              <?php if ($m['graduation_year']): ?><p class="text-sm text-muted">Class of <?= h($m['graduation_year']) ?></p><?php endif; ?>
               <?php if ($m['occupation']): ?><p class="text-sm"><?= h($m['occupation']) ?> at <?= h($m['employer'] ?? '') ?></p><?php endif; ?>
             </div>
           </article>

@@ -9,7 +9,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Strip base path (for subdirectory installs like /alumni/)
 $base = parse_url(APP_URL, PHP_URL_PATH) ?: '';
-if ($base && str_starts_with($uri, $base)) {
+if ($base && strpos($uri, $base) === 0) {
     $uri = substr($uri, strlen($base));
 }
 $uri = '/' . ltrim($uri, '/');
@@ -33,6 +33,7 @@ $routes = [
         // Auth
         '/login'               => fn() => (new AuthController)->showLogin(),
         '/register'            => fn() => (new AuthController)->showRegister(),
+        '/registration-success'=> fn() => include VIEWS_PATH . '/auth/registration-success.php',
         '/logout'              => fn() => (new AuthController)->logout(),
         '/verify-email'        => fn() => (new AuthController)->verifyEmail(),
         '/forgot-password'     => fn() => (new AuthController)->showForgotPassword(),
@@ -50,6 +51,8 @@ $routes = [
         // Executive
         '/executive/dashboard' => fn() => include VIEWS_PATH . '/executive/dashboard.php',
         '/executive/members'   => fn() => include VIEWS_PATH . '/executive/members.php',
+        '/executive/members/create' => fn() => include VIEWS_PATH . '/executive/member-create.php',
+        '/executive/members/{id}' => fn() => include VIEWS_PATH . '/executive/member.php',
         '/executive/events'    => fn() => include VIEWS_PATH . '/executive/events.php',
         '/executive/events/create' => fn() => include VIEWS_PATH . '/executive/event-form.php',
         '/executive/projects'  => fn() => include VIEWS_PATH . '/executive/projects.php',
@@ -93,6 +96,11 @@ $routes = [
         '/financial/donations/{id}/approve' => fn() => donationApprove(),
         '/financial/donations/{id}/cancel'  => fn() => donationCancel(),
         '/financial/reports/export'         => fn() => reportsExport(),
+
+        '/executive/members/{id}/role'   => fn() => memberRoleUpdate(),
+        '/executive/members/{id}/toggle' => fn() => memberToggleActive(),
+        '/executive/members/{id}/delete' => fn() => memberDelete(),
+        '/executive/members/store' => fn() => memberStore(),
 
         '/admin/testimonials/store'  => fn() => testimonialStore(),
         '/admin/testimonials/update' => fn() => testimonialUpdate(),
@@ -386,4 +394,107 @@ function testimonialDelete(): void
     if ($id) (new Testimonial())->delete($id);
     flash('success', 'Testimonial deleted.', 'success');
     redirect('/admin/testimonials');
+}
+
+function memberStore(): void
+{
+    require_login(); require_role(ROLE_ADMIN); verify_csrf();
+
+    $errors = [];
+    $email     = sanitize_input($_POST['email'] ?? '');
+    $password  = $_POST['password'] ?? '';
+    $confirm   = $_POST['password_confirm'] ?? '';
+    $firstName = sanitize_input($_POST['first_name'] ?? '');
+    $lastName  = sanitize_input($_POST['last_name'] ?? '');
+    $roleId    = (int)($_POST['role_id'] ?? ROLE_MEMBER);
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Valid email is required.';
+    }
+    if (strlen($password) < PASSWORD_MIN_LEN) {
+        $errors[] = 'Password must be at least ' . PASSWORD_MIN_LEN . ' characters.';
+    }
+    if ($password !== $confirm) {
+        $errors[] = 'Passwords do not match.';
+    }
+    if (empty($firstName)) {
+        $errors[] = 'First name is required.';
+    }
+    if (empty($lastName)) {
+        $errors[] = 'Last name is required.';
+    }
+    if ((new User())->findByEmail($email)) {
+        $errors[] = 'Email address is already registered.';
+    }
+
+    if ($errors) {
+        $_SESSION['admin_member_errors'] = $errors;
+        $_SESSION['admin_member_old'] = array_filter([
+            'email' => $email,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'role_id' => $roleId,
+            'occupation' => sanitize_input($_POST['occupation'] ?? ''),
+            'employer' => sanitize_input($_POST['employer'] ?? ''),
+            'city' => sanitize_input($_POST['city'] ?? ''),
+            'country' => sanitize_input($_POST['country'] ?? ''),
+        ]);
+        redirect('/executive/members/create');
+    }
+
+    $userId = (new User())->create([
+        'email'        => $email,
+        'password'     => $password,
+        'first_name'   => $firstName,
+        'last_name'    => $lastName,
+        'role_id'      => $roleId,
+        'verify_token' => bin2hex(random_bytes(32)),
+    ]);
+    (new User())->activateUser($userId);
+    (new User())->updateProfile($userId, [
+        'occupation' => sanitize_input($_POST['occupation'] ?? ''),
+        'employer' => sanitize_input($_POST['employer'] ?? ''),
+        'city' => sanitize_input($_POST['city'] ?? ''),
+        'country' => sanitize_input($_POST['country'] ?? ''),
+    ]);
+
+    flash('success', 'Member created successfully.', 'success');
+    redirect('/executive/members');
+}
+
+function memberRoleUpdate(): void
+{
+    require_login(); require_role(ROLE_ADMIN); verify_csrf();
+    $id = (int)($_GET['id'] ?? 0);
+    $roleId = (int)($_POST['role_id'] ?? 0);
+    if ($id && $roleId) {
+        (new User())->updateRole($id, $roleId);
+        flash('success', 'Member role updated.', 'success');
+    }
+    redirect('/executive/members');
+}
+
+function memberToggleActive(): void
+{
+    require_login(); require_role(ROLE_ADMIN); verify_csrf();
+    $id = (int)($_GET['id'] ?? 0);
+    $active = isset($_POST['active']) ? (bool)$_POST['active'] : false;
+    if ($id) {
+        (new User())->toggleActive($id, $active);
+        flash('success', 'Member status updated.', 'success');
+    }
+    redirect('/executive/members');
+}
+
+function memberDelete(): void
+{
+    require_login(); require_role(ROLE_ADMIN); verify_csrf();
+    $id = (int)($_GET['id'] ?? 0);
+    if ($id && $id !== auth()['id']) {
+        (new User())->delete($id);
+        flash('success', 'Member deleted successfully.', 'success');
+    } else {
+        flash('error', 'Unable to delete this user.', 'error');
+    }
+    redirect('/executive/members');
 }

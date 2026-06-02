@@ -87,59 +87,48 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
       </div>
 
       <hr style="margin:18px 0;border:none;border-top:1px solid var(--gray-100)">
-      <h3 style="margin:0 0 12px;font-size:1rem;color:var(--gray-700)">Profile (optional)</h3>
+      <h3 style="margin:0 0 12px;font-size:1rem;color:var(--gray-700)">Profile</h3>
+      <p style="margin:.25rem 0 16px;color:var(--gray-600);font-size:.95rem;">Please fill in all fields below to complete registration.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="form-group">
           <label class="form-label" for="phone">Phone</label>
-          <input type="text" id="phone" name="phone" class="form-control" value="<?= h($old['phone'] ?? '') ?>">
+          <input type="text" id="phone" name="phone" class="form-control" required value="<?= h($old['phone'] ?? '') ?>">
         </div>
-        <div class="form-group">
-          <label class="form-label" for="graduation_year">Graduation Year</label>
-          <input type="text" id="graduation_year" name="graduation_year" class="form-control" value="<?= h($old['graduation_year'] ?? '') ?>">
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="form-group">
-          <label class="form-label" for="degree">Degree</label>
-          <input type="text" id="degree" name="degree" class="form-control" value="<?= h($old['degree'] ?? '') ?>">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="department">Department</label>
-          <input type="text" id="department" name="department" class="form-control" value="<?= h($old['department'] ?? '') ?>">
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="form-group">
           <label class="form-label" for="occupation">Occupation</label>
-          <input type="text" id="occupation" name="occupation" class="form-control" value="<?= h($old['occupation'] ?? '') ?>">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="employer">Employer</label>
-          <input type="text" id="employer" name="employer" class="form-control" value="<?= h($old['employer'] ?? '') ?>">
+          <input type="text" id="occupation" name="occupation" class="form-control" required value="<?= h($old['occupation'] ?? '') ?>">
         </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="form-group">
-          <label class="form-label" for="city">City</label>
-          <input type="text" id="city" name="city" class="form-control" value="<?= h($old['city'] ?? '') ?>">
+          <label class="form-label" for="employer">Employer</label>
+          <input type="text" id="employer" name="employer" class="form-control" required value="<?= h($old['employer'] ?? '') ?>">
         </div>
         <div class="form-group">
-          <label class="form-label" for="country">Country</label>
-          <input type="text" id="country" name="country" class="form-control" value="<?= h($old['country'] ?? '') ?>">
+          <label class="form-label" for="city">City</label>
+          <input type="text" id="city" name="city" class="form-control" required value="<?= h($old['city'] ?? '') ?>">
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="form-group">
-          <label class="form-label" for="membership_year">Membership Year</label>
-          <input type="text" id="membership_year" name="membership_year" class="form-control" value="<?= h($old['membership_year'] ?? '') ?>">
+          <label class="form-label" for="country">Country</label>
+          <input type="text" id="country" name="country" class="form-control" required value="<?= h($old['country'] ?? '') ?>">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="house">House</label>
+          <select id="house" name="house" class="form-control" required>
+            <option value="" <?= empty($old['house']) ? 'selected' : '' ?>>Select House</option>
+            <option value="House 1" <?= ($old['house'] ?? '') === 'House 1' ? 'selected' : '' ?>>House 1</option>
+            <option value="House 2" <?= ($old['house'] ?? '') === 'House 2' ? 'selected' : '' ?>>House 2</option>
+            <option value="House 3" <?= ($old['house'] ?? '') === 'House 3' ? 'selected' : '' ?>>House 3</option>
+            <option value="House 4" <?= ($old['house'] ?? '') === 'House 4' ? 'selected' : '' ?>>House 4</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label" for="avatar">Upload Photo</label>
-          <input type="file" id="avatar" name="avatar" accept="image/*" class="form-control">
+          <input type="file" id="avatar" name="avatar" accept="image/*" class="form-control" required>
         </div>
       </div>
 

@@ -12,10 +12,10 @@ class User
     {
         $stmt = $this->db->prepare(
             'SELECT u.*, r.name AS role_name, r.label AS role_label,
-                    p.avatar, p.phone, p.graduation_year, p.degree, p.department,
-                    p.bio, p.occupation, p.employer, p.city, p.state, p.country,
+                    p.avatar, p.phone,
+                    p.bio, p.occupation, p.employer, p.city, p.state, p.country, p.house,
                     p.linkedin_url, p.twitter_url, p.facebook_url,
-                    p.membership_year, p.dues_paid_until
+                    p.dues_paid_until
              FROM users u
              JOIN roles   r ON r.id = u.role_id
              LEFT JOIN profiles p ON p.user_id = u.id
@@ -33,6 +33,22 @@ class User
              WHERE u.email = ?'
         );
         $stmt->execute([strtolower(trim($email))]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public function findByVerifyToken(string $token): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT u.*, r.name AS role_name, r.label AS role_label,
+                    p.avatar, p.phone,
+                    p.bio, p.occupation, p.employer, p.city, p.state, p.country,
+                    p.linkedin_url, p.twitter_url, p.facebook_url, p.house
+             FROM users u
+             JOIN roles r ON r.id = u.role_id
+             LEFT JOIN profiles p ON p.user_id = u.id
+             WHERE u.email_verify_token = ? AND u.email_verified_at IS NULL'
+        );
+        $stmt->execute([$token]);
         return $stmt->fetch() ?: null;
     }
 
@@ -59,14 +75,20 @@ class User
         return $userId;
     }
 
-    public function verifyEmail(string $token): bool
+    public function verifyEmail(string $token): ?array
     {
+        $user = $this->findByVerifyToken($token);
+        if (!$user) {
+            return null;
+        }
+
         $stmt = $this->db->prepare(
             'UPDATE users SET is_active = 1, email_verified_at = NOW(), email_verify_token = NULL
-             WHERE email_verify_token = ? AND email_verified_at IS NULL'
+             WHERE id = ? AND email_verified_at IS NULL'
         );
-        $stmt->execute([$token]);
-        return $stmt->rowCount() > 0;
+        $stmt->execute([$user['id']]);
+
+        return $stmt->rowCount() > 0 ? $user : null;
     }
 
     public function setPasswordResetToken(string $email, string $token): bool
@@ -108,9 +130,9 @@ class User
         }
 
         // Upsert profile
-        $fields = ['phone','graduation_year','degree','department','bio','occupation',
-                   'employer','city','state','country','linkedin_url','twitter_url',
-                   'facebook_url','membership_year'];
+        $fields = ['phone','bio','occupation',
+                   'employer','city','state','country','house','linkedin_url','twitter_url',
+                   'facebook_url'];
         $setClauses = implode(', ', array_map(fn($f) => "$f = ?", $fields));
         $values     = array_map(fn($f) => $data[$f] ?? null, $fields);
         $values[]   = $userId;
@@ -152,7 +174,7 @@ class User
         $stmt = $this->db->prepare(
             "SELECT u.id, u.email, u.first_name, u.last_name, u.is_active,
                     u.is_profile_complete, u.last_login_at, u.created_at,
-                    r.label AS role_label, p.avatar, p.graduation_year
+                    r.label AS role_label, p.avatar
              FROM users u
              JOIN roles r ON r.id = u.role_id
              LEFT JOIN profiles p ON p.user_id = u.id
@@ -182,6 +204,18 @@ class User
     {
         $this->db->prepare('UPDATE users SET is_active = ? WHERE id = ?')
                  ->execute([(int)$active, $userId]);
+    }
+
+    public function delete(int $userId): void
+    {
+        $this->db->prepare('DELETE FROM users WHERE id = ?')->execute([$userId]);
+    }
+
+    public function activateUser(int $userId): void
+    {
+        $this->db->prepare(
+            'UPDATE users SET is_active = 1, email_verified_at = NOW(), email_verify_token = NULL WHERE id = ?'
+        )->execute([$userId]);
     }
 
     public function totalCount(): int

@@ -70,6 +70,7 @@ CREATE TABLE profiles (
   city            VARCHAR(80)   NULL,
   state           VARCHAR(80)   NULL,
   country         VARCHAR(80)   NULL DEFAULT 'Ghana',
+  house           VARCHAR(50)   NULL,
   linkedin_url    VARCHAR(255)  NULL,
   twitter_url     VARCHAR(255)  NULL,
   facebook_url    VARCHAR(255)  NULL,

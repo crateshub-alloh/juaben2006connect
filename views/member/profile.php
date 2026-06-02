@@ -35,9 +35,6 @@ $avatarUrl = !empty($userFull['avatar'])
          style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--blue-200);margin-bottom:16px;">
     <h3 style="font-size:1.05rem;"><?= h($userFull['first_name'] . ' ' . $userFull['last_name']) ?></h3>
     <p class="text-sm text-muted"><?= h($user['role_name']) ?></p>
-    <?php if ($userFull['graduation_year']): ?>
-      <p class="text-sm text-muted mt-1">Class of <?= $userFull['graduation_year'] ?></p>
-    <?php endif; ?>
     <p class="text-xs text-muted mt-2">Member since <?= date('M Y', strtotime($userFull['created_at'])) ?></p>
 
     <form method="POST" action="<?= APP_URL ?>/member/profile/avatar" enctype="multipart/form-data" class="mt-4">
@@ -47,6 +44,9 @@ $avatarUrl = !empty($userFull['avatar'])
         <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display:none;" onchange="this.form.submit()">
       </label>
     </form>
+    <a href="<?= APP_URL ?>/logout" class="btn btn-danger btn-sm btn-block mt-2" onclick="return confirm('Log out?');">
+      <i class="fa fa-right-from-bracket"></i> Log Out
+    </a>
   </div>
 
   <!-- Profile Form -->
@@ -69,23 +69,6 @@ $avatarUrl = !empty($userFull['avatar'])
           <input type="tel" name="phone" class="form-control" value="<?= h($userFull['phone'] ?? '') ?>" placeholder="+233...">
         </div>
         <div class="form-group">
-          <label class="form-label">Graduation Year</label>
-          <select name="graduation_year" class="form-control">
-            <option value="">Select year</option>
-            <?php for ($y = date('Y'); $y >= 1980; $y--): ?>
-              <option value="<?= $y ?>" <?= ($userFull['graduation_year'] == $y) ? 'selected' : '' ?>><?= $y ?></option>
-            <?php endfor; ?>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Degree</label>
-          <input type="text" name="degree" class="form-control" value="<?= h($userFull['degree'] ?? '') ?>" placeholder="B.Sc. Computer Science">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Department</label>
-          <input type="text" name="department" class="form-control" value="<?= h($userFull['department'] ?? '') ?>">
-        </div>
-        <div class="form-group">
           <label class="form-label">Occupation</label>
           <input type="text" name="occupation" class="form-control" value="<?= h($userFull['occupation'] ?? '') ?>">
         </div>
@@ -100,6 +83,16 @@ $avatarUrl = !empty($userFull['avatar'])
         <div class="form-group">
           <label class="form-label">Country</label>
           <input type="text" name="country" class="form-control" value="<?= h($userFull['country'] ?? 'Ghana') ?>">
+        </div>
+        <div class="form-group">
+          <label class="form-label">House</label>
+          <select name="house" class="form-control">
+            <option value="">Select House</option>
+            <option value="House 1" <?= ($userFull['house'] ?? '') === 'House 1' ? 'selected' : '' ?>>House 1</option>
+            <option value="House 2" <?= ($userFull['house'] ?? '') === 'House 2' ? 'selected' : '' ?>>House 2</option>
+            <option value="House 3" <?= ($userFull['house'] ?? '') === 'House 3' ? 'selected' : '' ?>>House 3</option>
+            <option value="House 4" <?= ($userFull['house'] ?? '') === 'House 4' ? 'selected' : '' ?>>House 4</option>
+          </select>
         </div>
       </div>
 

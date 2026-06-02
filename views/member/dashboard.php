@@ -89,9 +89,6 @@ $profilePct   = $userFull['is_profile_complete'] ? 100 : 40;
         </div>
         <h3 class="profile-card__name"><?= h($user['first_name'] . ' ' . $user['last_name']) ?></h3>
         <p class="profile-card__role"><?= h($user['role_name']) ?></p>
-        <?php if ($userFull['graduation_year']): ?>
-          <p class="text-sm text-muted mt-1"><i class="fa fa-graduation-cap"></i> Year Group <?= $userFull['graduation_year'] ?></p>
-        <?php endif; ?>
         <?php if ($userFull['occupation']): ?>
           <p class="text-sm text-muted"><i class="fa fa-briefcase"></i> <?= h($userFull['occupation']) ?></p>
         <?php endif; ?>

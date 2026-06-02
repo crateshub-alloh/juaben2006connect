@@ -30,10 +30,10 @@ define('MAX_UPLOAD_MB',  5);
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
 // Email (override via environment)
-define('SMTP_HOST',     getenv('SMTP_HOST') ?: '');
+define('SMTP_HOST',     getenv('SMTP_HOST') ?: 'smtp.hostinger.com');
 define('SMTP_PORT',     getenv('SMTP_PORT') ?: 587);
-define('SMTP_USER',     getenv('SMTP_USER') ?: '');
-define('SMTP_PASS',     getenv('SMTP_PASS') ?: '');
+define('SMTP_USER',     getenv('SMTP_USER') ?: 'noreply@juaben2006connect.com');
+define('SMTP_PASS',     getenv('SMTP_PASS') ?: 'Queenie@3608!@#.');
 define('MAIL_FROM',     getenv('MAIL_FROM') ?: 'noreply@juaben2006connect.com');
 define('MAIL_FROM_NAME', APP_NAME);
 

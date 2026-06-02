@@ -3,7 +3,8 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 $pageTitle = 'Login';
 $errors    = get_flash('error');
 $success   = get_flash('success');
-$warning   = get_flash('error'); // reuse
+$warning   = get_flash('warning');
+$registered = !empty($_GET['registered']);
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -26,14 +27,17 @@ $warning   = get_flash('error'); // reuse
       <p>Welcome back, classmate – sign in to your account</p>
     </div>
 
-    <?php $s = get_flash('success'); if ($s): ?>
-      <div class="alert alert-success"><i class="fa fa-circle-check"></i> <?= h($s['message']) ?></div>
+    <?php if ($registered): ?>
+      <div class="alert alert-success"><i class="fa fa-circle-check"></i> Registration successful. Please sign in to continue to your profile.</div>
     <?php endif; ?>
-    <?php $e = get_flash('error'); if ($e): ?>
-      <div class="alert alert-error"><i class="fa fa-circle-xmark"></i> <?= h($e['message']) ?></div>
+    <?php if ($success): ?>
+      <div class="alert alert-success"><i class="fa fa-circle-check"></i> <?= h($success['message']) ?></div>
     <?php endif; ?>
-    <?php $w = get_flash('warning'); if ($w): ?>
-      <div class="alert alert-warning"><i class="fa fa-triangle-exclamation"></i> <?= h($w['message']) ?></div>
+    <?php if ($errors): ?>
+      <div class="alert alert-error"><i class="fa fa-circle-xmark"></i> <?= h($errors['message']) ?></div>
+    <?php endif; ?>
+    <?php if ($warning): ?>
+      <div class="alert alert-warning"><i class="fa fa-triangle-exclamation"></i> <?= h($warning['message']) ?></div>
     <?php endif; ?>
 
     <form method="POST" action="<?= APP_URL ?>/login" novalidate>
@@ -61,6 +65,7 @@ $warning   = get_flash('error'); // reuse
         </div>
       </div>
 
+      <input type="hidden" name="next" value="<?= h($_GET['next'] ?? '') ?>">
       <button type="submit" class="btn btn-blue btn-block btn-lg">
         <i class="fa fa-sign-in"></i> Sign In
       </button>

@@ -45,7 +45,7 @@ $roles  = Database::getInstance()->query('SELECT * FROM roles')->fetchAll();
   <div class="table-responsive">
     <table class="dash-table">
       <thead>
-        <tr><th>Member</th><th>Graduation</th><th>Role</th><th>Profile</th><th>Status</th><th>Last Login</th><th>Actions</th></tr>
+        <tr><th>Member</th><th>Role</th><th>Profile</th><th>Status</th><th>Last Login</th><th>Actions</th></tr>
       </thead>
       <tbody>
         <?php foreach ($result['data'] as $m): ?>
@@ -59,7 +59,6 @@ $roles  = Database::getInstance()->query('SELECT * FROM roles')->fetchAll();
               </div>
             </div>
           </td>
-          <td><?= $m['graduation_year'] ?? '–' ?></td>
           <td>
             <?php if (auth()['role_id'] == ROLE_ADMIN): ?>
               <form method="POST" action="<?= APP_URL ?>/executive/members/<?= $m['id'] ?>/role">
@@ -87,13 +86,21 @@ $roles  = Database::getInstance()->query('SELECT * FROM roles')->fetchAll();
             </form>
           </td>
           <td class="text-sm text-muted"><?= $m['last_login_at'] ? date('M j', strtotime($m['last_login_at'])) : 'Never' ?></td>
-          <td>
+          <td style="display:flex;gap:6px;align-items:center;">
             <a href="<?= APP_URL ?>/executive/members/<?= $m['id'] ?>" class="btn btn-outline btn-sm"><i class="fa fa-eye"></i></a>
+            <?php if (auth()['role_id'] == ROLE_ADMIN && $m['id'] !== auth()['id']): ?>
+              <form method="POST" action="<?= APP_URL ?>/executive/members/<?= $m['id'] ?>/delete" style="display:inline;">
+                <?= csrf_field() ?>
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this member permanently?');">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </form>
+            <?php endif; ?>
           </td>
         </tr>
         <?php endforeach; ?>
         <?php if (empty($result['data'])): ?>
-          <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-500);">No members found.</td></tr>
+          <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--gray-500);">No members found.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

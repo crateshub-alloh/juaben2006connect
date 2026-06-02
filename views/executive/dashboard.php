@@ -133,7 +133,6 @@ $inlineJs = "
               </div>
             </div>
           </td>
-          <td><?= $m['graduation_year'] ?? '–' ?></td>
           <td><?= h($m['role_label']) ?></td>
           <td><span class="status status-<?= $m['is_active'] ? 'active' : 'inactive' ?>"><?= $m['is_active'] ? 'Active' : 'Inactive' ?></span></td>
           <td><?= date('M j, Y', strtotime($m['created_at'])) ?></td>
