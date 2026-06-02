@@ -221,7 +221,7 @@ include ROOT_PATH . '/components/navbar.php';
     </div>
 
     <div class="text-center mt-5">
-      <a href="<?= APP_URL ?>/students" class="btn btn-outline">View All Members <i class="fa fa-arrow-right"></i></a>
+      <a href="<?= APP_URL ?>/oldstudents" class="btn btn-outline">View All Members <i class="fa fa-arrow-right"></i></a>
     </div>
   </div>
 </section>
