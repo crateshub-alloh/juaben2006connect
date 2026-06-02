@@ -75,9 +75,6 @@ $routes = [
         // API
         '/api/notifications'   => fn() => include ROOT_PATH . '/api/notifications.php',
 
-        // Temporary mail debug – remove after fixing email
-        '/debug-mail'          => fn() => debugMail(),
-        '/debug-env'           => fn() => debugEnv(),
     ],
     'POST' => [
         '/login'               => fn() => (new AuthController)->login(),
@@ -501,63 +498,4 @@ function memberDelete(): void
         flash('error', 'Unable to delete this user.', 'error');
     }
     redirect('/executive/members');
-}
-
-function debugEnv(): void
-{
-    header('Content-Type: text/plain');
-    echo 'APP_ENV=' . APP_ENV . PHP_EOL;
-    echo 'SMTP_HOST=' . SMTP_HOST . PHP_EOL;
-    echo 'SMTP_USER=' . SMTP_USER . PHP_EOL;
-    echo 'PHP_VERSION=' . PHP_VERSION . PHP_EOL;
-    echo 'sys_get_temp_dir=' . sys_get_temp_dir() . PHP_EOL;
-    $paths = ['/tmp/', sys_get_temp_dir() . '/', ROOT_PATH . '/', '/home/u189877836/'];
-    foreach ($paths as $p) {
-        $r = @file_put_contents($p . 'wtest.txt', 'ok');
-        echo 'WRITE ' . $p . ' => ' . ($r !== false ? 'OK' : 'FAIL') . PHP_EOL;
-    }
-    // Check last registered user
-    $db = Database::getInstance();
-    $row = $db->query('SELECT id, email, is_active, email_verified_at IS NULL as unverified, created_at FROM users ORDER BY created_at DESC LIMIT 1')->fetch();
-    echo 'LAST_USER=' . json_encode($row) . PHP_EOL;
-}
-
-// Temporary SMTP debug — remove after email is confirmed working
-function debugMail(): void
-{
-    $to = $_GET['to'] ?? '';
-    if (!$to || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
-        echo '<p>Usage: /debug-mail?to=your@email.com</p>';
-        return;
-    }
-
-    require_once ROOT_PATH . '/lib/phpmailer/Exception.php';
-    require_once ROOT_PATH . '/lib/phpmailer/PHPMailer.php';
-    require_once ROOT_PATH . '/lib/phpmailer/SMTP.php';
-
-    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-    $mail->SMTPDebug = 2;
-    ob_start();
-    try {
-        $mail->isSMTP();
-        $mail->Host       = SMTP_HOST;
-        $mail->SMTPAuth   = true;
-        $mail->Username   = SMTP_USER;
-        $mail->Password   = SMTP_PASS;
-        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = SMTP_PORT;
-        $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
-        $mail->addAddress($to);
-        $mail->isHTML(true);
-        $mail->Subject = 'SMTP Test – ' . APP_NAME;
-        $mail->Body    = '<p>SMTP is working correctly.</p>';
-        $mail->send();
-        $log = ob_get_clean();
-        echo '<h2 style="color:green">✓ Email sent successfully to ' . htmlspecialchars($to) . '</h2>';
-    } catch (\Exception $e) {
-        $log = ob_get_clean();
-        echo '<h2 style="color:red">✗ Failed: ' . htmlspecialchars($mail->ErrorInfo) . '</h2>';
-    }
-    echo '<pre style="background:#f4f4f4;padding:1em;font-size:12px">' . htmlspecialchars($log) . '</pre>';
-    echo '<p><strong>Config:</strong> Host=' . SMTP_HOST . ' Port=' . SMTP_PORT . ' User=' . SMTP_USER . '</p>';
 }
