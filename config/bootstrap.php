@@ -178,12 +178,34 @@ function money(float $amount, string $currency = 'GHS'): string
 }
 
 // ------------------------------------------------------------
-// Simple mailer (PHPMailer-compatible stub; swap for PHPMailer)
+// Mailer — uses PHPMailer over SMTP
 // ------------------------------------------------------------
 function send_mail(string $to, string $subject, string $html): bool
 {
-    $headers  = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-type: text/html; charset=utf-8\r\n";
-    $headers .= "From: " . MAIL_FROM_NAME . " <" . MAIL_FROM . ">\r\n";
-    return mail($to, $subject, $html, $headers);
+    require_once ROOT_PATH . '/lib/phpmailer/Exception.php';
+    require_once ROOT_PATH . '/lib/phpmailer/PHPMailer.php';
+    require_once ROOT_PATH . '/lib/phpmailer/SMTP.php';
+
+    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASS;
+        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = SMTP_PORT;
+
+        $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
+        $mail->addAddress($to);
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $html;
+
+        $mail->send();
+        return true;
+    } catch (\Exception $e) {
+        error_log('Mailer error: ' . $mail->ErrorInfo);
+        return false;
+    }
 }
