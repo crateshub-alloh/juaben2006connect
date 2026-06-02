@@ -35,9 +35,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          cat > ~/.ssh/deploy_key <<'EOF'
-$SSH_PRIVATE_KEY
-EOF
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
       - name: Add SSH host to known_hosts
