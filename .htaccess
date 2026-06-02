@@ -22,7 +22,7 @@ Options -MultiViews
 # Route all requests through index.php
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /alumni/
+    RewriteBase /
     # Note: If using MAMP, this is correct. For a root domain, change to: RewriteBase /
 
     # Allow real files and directories through
