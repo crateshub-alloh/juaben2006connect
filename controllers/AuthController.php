@@ -93,15 +93,16 @@ class AuthController
         if ($errors) {
             $_SESSION['register_errors'] = $errors;
             $_SESSION['register_old']    = [
-                'email' => $email,
-                'firstName' => $firstName,
-                'lastName' => $lastName,
-                'phone' => sanitize_input($_POST['phone'] ?? ''),
+                'email'      => $email,
+                'firstName'  => $firstName,
+                'lastName'   => $lastName,
+                'phone_code' => sanitize_input($_POST['phone_code'] ?? '+233'),
+                'phone'      => sanitize_input($_POST['phone'] ?? ''),
                 'occupation' => sanitize_input($_POST['occupation'] ?? ''),
-                'employer' => sanitize_input($_POST['employer'] ?? ''),
-                'city' => sanitize_input($_POST['city'] ?? ''),
-                'country' => sanitize_input($_POST['country'] ?? ''),
-                'house' => sanitize_input($_POST['house'] ?? ''),
+                'employer'   => sanitize_input($_POST['employer'] ?? ''),
+                'city'       => sanitize_input($_POST['city'] ?? ''),
+                'country'    => sanitize_input($_POST['country'] ?? ''),
+                'house'      => sanitize_input($_POST['house'] ?? ''),
             ];
             redirect('/register');
         }
@@ -129,14 +130,16 @@ class AuthController
             ";
             send_mail($email, 'Verify your NJOSA Alumni Portal account', $html);
         }
+        $phoneCode = sanitize_input($_POST['phone_code'] ?? '+233');
+        $phoneNum  = sanitize_input($_POST['phone'] ?? '');
         $profileFields = [
-            'phone' => sanitize_input($_POST['phone'] ?? ''),
+            'phone'      => $phoneCode . ' ' . $phoneNum,
             'occupation' => sanitize_input($_POST['occupation'] ?? ''),
-            'employer' => sanitize_input($_POST['employer'] ?? ''),
-            'city' => sanitize_input($_POST['city'] ?? ''),
-            'state' => sanitize_input($_POST['state'] ?? ''),
-            'country' => sanitize_input($_POST['country'] ?? ''),
-            'house' => sanitize_input($_POST['house'] ?? ''),
+            'employer'   => sanitize_input($_POST['employer'] ?? ''),
+            'city'       => sanitize_input($_POST['city'] ?? ''),
+            'state'      => sanitize_input($_POST['state'] ?? ''),
+            'country'    => sanitize_input($_POST['country'] ?? ''),
+            'house'      => sanitize_input($_POST['house'] ?? ''),
         ];
 
         // Update profile row
