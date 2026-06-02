@@ -28,12 +28,15 @@ $avatarUrl = !empty($userFull['avatar'])
   <div class="alert alert-error"><i class="fa fa-circle-xmark"></i> <?= h($error['message']) ?></div>
 <?php endif; ?>
 
-<div style="display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;">
-  <!-- Avatar Card -->
-  <div class="table-card" style="padding:28px;text-align:center;">
+<div style="display:flex;flex-direction:column;gap:24px;">
+  <!-- Avatar Card (centered) -->
+  <div class="table-card" style="padding:28px;text-align:center;max-width:340px;margin:0 auto;width:100%;">
     <img id="avatarPreview" src="<?= $avatarUrl ?>" alt="Avatar"
-         style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--blue-200);margin-bottom:16px;">
-    <h3 style="font-size:1.05rem;"><?= h($userFull['first_name'] . ' ' . $userFull['last_name']) ?></h3>
+         style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid var(--blue-200);margin-bottom:14px;display:block;margin-left:auto;margin-right:auto;">
+    <h3 style="font-size:1.1rem;"><?= h($userFull['first_name'] . ' ' . $userFull['last_name']) ?></h3>
+    <?php if (!empty($userFull['nickname'])): ?>
+      <p class="text-sm text-muted" style="font-style:italic;">"<?= h($userFull['nickname']) ?>"</p>
+    <?php endif; ?>
     <p class="text-sm text-muted"><?= h($user['role_name']) ?></p>
     <p class="text-xs text-muted mt-2">Member since <?= date('M Y', strtotime($userFull['created_at'])) ?></p>
 
@@ -65,8 +68,12 @@ $avatarUrl = !empty($userFull['avatar'])
           <input type="text" name="last_name" class="form-control" value="<?= h($userFull['last_name']) ?>" required>
         </div>
         <div class="form-group">
+          <label class="form-label">Nickname <span style="color:var(--gray-400);font-weight:400;font-size:.82rem;">(optional)</span></label>
+          <input type="text" name="nickname" class="form-control" value="<?= h($userFull['nickname'] ?? '') ?>" placeholder="e.g. Kofi, Big B...">
+        </div>
+        <div class="form-group">
           <label class="form-label">Phone Number</label>
-          <input type="tel" name="phone" class="form-control" value="<?= h($userFull['phone'] ?? '') ?>" placeholder="+233...">
+          <input type="tel" name="phone" class="form-control" value="<?= h($userFull['phone'] ?? '') ?>" placeholder="+233 024...">
         </div>
         <div class="form-group">
           <label class="form-label">Occupation</label>

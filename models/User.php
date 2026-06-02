@@ -13,7 +13,7 @@ class User
         $stmt = $this->db->prepare(
             'SELECT u.*, r.name AS role_name, r.label AS role_label,
                     p.avatar, p.phone,
-                    p.bio, p.occupation, p.employer, p.city, p.state, p.country, p.house,
+                    p.bio, p.nickname, p.occupation, p.employer, p.city, p.state, p.country, p.house,
                     p.linkedin_url, p.twitter_url, p.facebook_url,
                     p.dues_paid_until
              FROM users u
@@ -130,7 +130,7 @@ class User
         }
 
         // Upsert profile
-        $fields = ['phone','bio','occupation',
+        $fields = ['phone','bio','nickname','occupation',
                    'employer','city','state','country','house','linkedin_url','twitter_url',
                    'facebook_url'];
         $setClauses = implode(', ', array_map(fn($f) => "$f = ?", $fields));

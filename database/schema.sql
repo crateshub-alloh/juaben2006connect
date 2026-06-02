@@ -65,6 +65,7 @@ CREATE TABLE profiles (
   degree          VARCHAR(120)  NULL,
   department      VARCHAR(120)  NULL,
   bio             TEXT          NULL,
+  nickname        VARCHAR(80)   NULL,
   occupation      VARCHAR(120)  NULL,
   employer        VARCHAR(120)  NULL,
   city            VARCHAR(80)   NULL,

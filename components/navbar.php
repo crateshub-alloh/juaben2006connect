@@ -3,7 +3,10 @@
   <div class="container">
     <a href="<?= APP_URL ?>/" class="navbar__logo" aria-label="Juaben2006 Connect home">
       <img src="<?= APP_URL ?>/assets/images/njosa-logo.png" alt="NJOSA Logo" class="navbar__logo-img">
-      <span>Juaben<span style="color:var(--gold-600)">2006</span>Connect</span>
+      <span class="navbar__logo-text">
+        <span class="navbar__logo-school">New Juaben Secondary High School</span>
+        <span class="navbar__logo-name">Juaben<span style="color:var(--gold-600)">2006</span>Connect</span>
+      </span>
     </a>
 
     <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">

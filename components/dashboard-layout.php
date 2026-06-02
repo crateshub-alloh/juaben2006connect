@@ -42,8 +42,8 @@ $avatarUrl = !empty($user['avatar'])
   <aside class="sidebar" aria-label="Dashboard navigation">
     <div class="sidebar__logo">
       <a href="<?= APP_URL ?>/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-        <img src="<?= APP_URL ?>/assets/images/njosa-logo.png" alt="NJOSA Logo" style="width:40px;height:40px;object-fit:contain;flex-shrink:0;">
-        <h2 style="margin:0;">Juaben<span style="color:var(--gold-400)">2006</span>Connect</h2>
+        <img src="<?= APP_URL ?>/assets/images/njosa-logo.png" alt="NJOSA Logo" style="width:38px;height:38px;object-fit:contain;flex-shrink:0;">
+        <h2 style="margin:0;font-size:.9rem;line-height:1.25;">Juaben<span style="color:var(--gold-400)">2006</span><br>Connect</h2>
       </a>
     </div>
 
