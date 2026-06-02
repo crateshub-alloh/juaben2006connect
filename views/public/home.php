@@ -16,6 +16,8 @@ $recentImages    = $galleryModel->recentImages(8);
 
 $testimonialModel = new Testimonial();
 $testimonials     = $testimonialModel->featured(6);
+// Recent members preview
+$recentMembers = $userModel->all(1, 6, ['is_active' => 1, 'role_id' => ROLE_MEMBER])['data'];
 
 $pageTitle = 'Home';
 include ROOT_PATH . '/components/head.php';
@@ -190,6 +192,40 @@ include ROOT_PATH . '/components/navbar.php';
 <!-- ────────────────────────────────────────────────────────────
      TESTIMONIALS
 ──────────────────────────────────────────────────────────── -->
+<?php if (!empty($recentMembers)): ?>
+<section class="section" id="members-preview">
+  <div class="container">
+    <div class="section-header">
+      <span class="tag">Members</span>
+      <h2>Meet Some of Our Members</h2>
+      <p>Registered Year Group 2006 members — connect and network.</p>
+    </div>
+
+    <div class="events-grid">
+      <?php foreach ($recentMembers as $m): ?>
+      <article class="card member-card fade-in">
+        <?php if (!empty($m['avatar'])): ?>
+          <img src="<?= UPLOADS_URL ?>/avatars/<?= h($m['avatar']) ?>" alt="<?= h($m['first_name'] . ' ' . $m['last_name']) ?>" class="card__img" loading="lazy">
+        <?php else: ?>
+          <div class="card__img" style="display:grid;place-items:center;background:linear-gradient(135deg,var(--blue-800),var(--blue-600));color:white;font-weight:700;">
+            <?= h(mb_substr($m['first_name'],0,1)) ?>
+          </div>
+        <?php endif; ?>
+        <div class="card__body">
+          <h3 class="card__title"><?= h($m['first_name'] . ' ' . $m['last_name']) ?></h3>
+          <?php if ($m['graduation_year']): ?><p class="text-sm text-muted">Class of <?= h($m['graduation_year']) ?></p><?php endif; ?>
+          <?php if ($m['occupation']): ?><p class="text-sm"><?= h($m['occupation']) ?><?= $m['employer'] ? ' at ' . h($m['employer']) : '' ?></p><?php endif; ?>
+        </div>
+      </article>
+      <?php endforeach; ?>
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="<?= APP_URL ?>/students" class="btn btn-outline">View All Members <i class="fa fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+<?php endif; ?>
 <section class="section testimonials-section">
   <div class="container">
     <div class="section-header">

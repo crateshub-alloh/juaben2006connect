@@ -23,6 +23,7 @@ $routes = [
     'GET'  => [
         '/'                    => fn() => include VIEWS_PATH . '/public/home.php',
         '/about'               => fn() => include VIEWS_PATH . '/public/about.php',
+        '/students'            => fn() => include VIEWS_PATH . '/public/students.php',
         '/events'              => fn() => include VIEWS_PATH . '/public/events.php',
         '/projects'            => fn() => include VIEWS_PATH . '/public/projects.php',
         '/gallery'             => fn() => include VIEWS_PATH . '/public/gallery.php',

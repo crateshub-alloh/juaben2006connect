@@ -37,7 +37,7 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
       </div>
     <?php endif; ?>
 
-    <form method="POST" action="<?= APP_URL ?>/register" novalidate>
+    <form method="POST" action="<?= APP_URL ?>/register" novalidate enctype="multipart/form-data">
       <?= csrf_field() ?>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -84,6 +84,63 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
           I agree to the <a href="#" style="color:var(--blue-700);">Terms of Service</a> and
           <a href="#" style="color:var(--blue-700);">Privacy Policy</a>
         </label>
+      </div>
+
+      <hr style="margin:18px 0;border:none;border-top:1px solid var(--gray-100)">
+      <h3 style="margin:0 0 12px;font-size:1rem;color:var(--gray-700)">Profile (optional)</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone</label>
+          <input type="text" id="phone" name="phone" class="form-control" value="<?= h($old['phone'] ?? '') ?>">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="graduation_year">Graduation Year</label>
+          <input type="text" id="graduation_year" name="graduation_year" class="form-control" value="<?= h($old['graduation_year'] ?? '') ?>">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label" for="degree">Degree</label>
+          <input type="text" id="degree" name="degree" class="form-control" value="<?= h($old['degree'] ?? '') ?>">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="department">Department</label>
+          <input type="text" id="department" name="department" class="form-control" value="<?= h($old['department'] ?? '') ?>">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label" for="occupation">Occupation</label>
+          <input type="text" id="occupation" name="occupation" class="form-control" value="<?= h($old['occupation'] ?? '') ?>">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="employer">Employer</label>
+          <input type="text" id="employer" name="employer" class="form-control" value="<?= h($old['employer'] ?? '') ?>">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label" for="city">City</label>
+          <input type="text" id="city" name="city" class="form-control" value="<?= h($old['city'] ?? '') ?>">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="country">Country</label>
+          <input type="text" id="country" name="country" class="form-control" value="<?= h($old['country'] ?? '') ?>">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end;">
+        <div class="form-group">
+          <label class="form-label" for="membership_year">Membership Year</label>
+          <input type="text" id="membership_year" name="membership_year" class="form-control" value="<?= h($old['membership_year'] ?? '') ?>">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="avatar">Upload Photo</label>
+          <input type="file" id="avatar" name="avatar" accept="image/*" class="form-control">
+        </div>
       </div>
 
       <button type="submit" class="btn btn-blue btn-block btn-lg">

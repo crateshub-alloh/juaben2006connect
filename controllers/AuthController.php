@@ -79,7 +79,20 @@ class AuthController
 
         if ($errors) {
             $_SESSION['register_errors'] = $errors;
-            $_SESSION['register_old']    = compact('email', 'firstName', 'lastName');
+            $_SESSION['register_old']    = [
+                'email' => $email,
+                'firstName' => $firstName,
+                'lastName' => $lastName,
+                'phone' => sanitize_input($_POST['phone'] ?? ''),
+                'graduation_year' => sanitize_input($_POST['graduation_year'] ?? ''),
+                'degree' => sanitize_input($_POST['degree'] ?? ''),
+                'department' => sanitize_input($_POST['department'] ?? ''),
+                'occupation' => sanitize_input($_POST['occupation'] ?? ''),
+                'employer' => sanitize_input($_POST['employer'] ?? ''),
+                'city' => sanitize_input($_POST['city'] ?? ''),
+                'country' => sanitize_input($_POST['country'] ?? ''),
+                'membership_year' => sanitize_input($_POST['membership_year'] ?? ''),
+            ];
             redirect('/register');
         }
 
@@ -91,6 +104,38 @@ class AuthController
             'last_name'    => $lastName,
             'verify_token' => $token,
         ]);
+
+        // Save optional profile fields submitted at registration
+        $profileFields = [
+            'phone' => sanitize_input($_POST['phone'] ?? ''),
+            'graduation_year' => sanitize_input($_POST['graduation_year'] ?? ''),
+            'degree' => sanitize_input($_POST['degree'] ?? ''),
+            'department' => sanitize_input($_POST['department'] ?? ''),
+            'occupation' => sanitize_input($_POST['occupation'] ?? ''),
+            'employer' => sanitize_input($_POST['employer'] ?? ''),
+            'city' => sanitize_input($_POST['city'] ?? ''),
+            'state' => sanitize_input($_POST['state'] ?? ''),
+            'country' => sanitize_input($_POST['country'] ?? ''),
+            'membership_year' => sanitize_input($_POST['membership_year'] ?? ''),
+        ];
+
+        // Update profile row
+        try {
+            $this->userModel->updateProfile((int)$userId, $profileFields);
+        } catch (Throwable $e) {
+            // non-fatal
+        }
+
+        // Handle avatar upload if provided
+        if (!empty($_FILES['avatar']['tmp_name'])) {
+            try {
+                $uploader = new UploadController('avatars');
+                $filename = $uploader->uploadImage($_FILES['avatar']);
+                $this->userModel->updateAvatar((int)$userId, $filename);
+            } catch (RuntimeException $e) {
+                // Non-fatal - continue without avatar
+            }
+        }
 
         $link = APP_URL . '/verify-email?token=' . $token;
         $html = "
