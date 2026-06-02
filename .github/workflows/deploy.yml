@@ -1,48 +1,57 @@
-name: Deploy to cPanel via FTP
+name: Deploy to cPanel via SSH
 
 on:
   push:
     branches: [ main, master ]
 
 jobs:
-  ftp-deploy:
+  ssh-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate FTP secrets
+      - name: Validate SSH secrets
         env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_DIR: ${{ secrets.SSH_DIR }}
         run: |
-          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USERNAME" ] || [ -z "$FTP_PASSWORD" ] || [ -z "$FTP_SERVER_DIR" ]; then
-            echo "ERROR: One or more FTP secrets are missing."
-            echo "Required: FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR"
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ] || [ -z "$SSH_PRIVATE_KEY" ] || [ -z "$SSH_DIR" ]; then
+            echo "ERROR: Missing one or more SSH secrets."
+            echo "Required: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, SSH_DIR"
             exit 1
           fi
-          echo "FTP secrets present"
+          echo "SSH secrets present"
 
-      - name: Deploy via SFTP (lftp)
-        env:
-          SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SFTP_USER: ${{ secrets.SFTP_USER }}
-          SFTP_PASS: ${{ secrets.SFTP_PASS }}
-          SFTP_DIR: ${{ secrets.SFTP_DIR }}
-          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+      - name: Install SSH tools
         run: |
-          if [ -z "$SFTP_HOST" ] || [ -z "$SFTP_USER" ] || [ -z "$SFTP_PASS" ] || [ -z "$SFTP_DIR" ]; then
-            echo "ERROR: Missing one or more SFTP secrets. Required: SFTP_HOST, SFTP_USER, SFTP_PASS, SFTP_DIR"
-            exit 1
-          fi
           sudo apt-get update -y
-          sudo apt-get install -y lftp
-          # normalize directory to end with '/'
-          if [[ "$SFTP_DIR" != */ ]]; then
-            SFTP_DIR="$SFTP_DIR/"
+          sudo apt-get install -y openssh-client rsync
+
+      - name: Start ssh-agent and add key
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add SSH host to known_hosts
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy files via rsync over SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_DIR: ${{ secrets.SSH_DIR }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          if [[ "$SSH_DIR" != */ ]]; then
+            SSH_DIR="$SSH_DIR/"
           fi
-          echo "Deploying to sftp://${SFTP_HOST}:${SFTP_PORT:-22}${SFTP_DIR}"
-          # run mirror upload (reverse) while excluding uploads and dev files
-          lftp -u "$SFTP_USER","$SFTP_PASS" -p "${SFTP_PORT:-22}" sftp://"$SFTP_HOST" -e "set ssl:verify-certificate false; mirror -R --parallel=4 --delete --verbose --exclude-glob .git* --exclude-glob .github/* --exclude-glob node_modules --exclude-glob vendor --exclude-glob tests --exclude-glob '*.zip' --exclude-glob 'assets/uploads/*' ./ '$SFTP_DIR' ; bye"
+          echo "Deploying to ssh://${SSH_USER}@${SSH_HOST}:${SSH_PORT:-22}${SSH_DIR}"
+          rsync -avz --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='vendor' --exclude='tests' --exclude='*.zip' --exclude='assets/uploads/*' -e "ssh -p ${SSH_PORT:-22}" ./ "$SSH_USER@$SSH_HOST:$SSH_DIR"
