@@ -11,6 +11,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate FTP secrets
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        run: |
+          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USERNAME" ] || [ -z "$FTP_PASSWORD" ] || [ -z "$FTP_SERVER_DIR" ]; then
+            echo "ERROR: One or more FTP secrets are missing."
+            echo "Required: FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR"
+            exit 1
+          fi
+          echo "FTP secrets present"
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.0
         with:
@@ -18,7 +32,10 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          server-dir: ${{ endsWith(secrets.FTP_SERVER_DIR, '/') && secrets.FTP_SERVER_DIR || format('{0}/', secrets.FTP_SERVER_DIR) }}
+          # optional: set FTP port/protocol via secrets if your host requires it
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ${{ secrets.FTP_PROTOCOL }}
           exclude: |
             .git*
             .github/*
@@ -26,3 +43,4 @@ jobs:
             vendor
             tests
             *.zip
+            assets/uploads/**
