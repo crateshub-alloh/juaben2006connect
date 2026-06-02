@@ -30,10 +30,15 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y openssh-client rsync
 
-      - name: Start ssh-agent and add key
-        uses: webfactory/ssh-agent@v0.10.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Save SSH private key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          cat > ~/.ssh/deploy_key <<'EOF'
+$SSH_PRIVATE_KEY
+EOF
+          chmod 600 ~/.ssh/deploy_key
 
       - name: Add SSH host to known_hosts
         env:
@@ -54,4 +59,4 @@ jobs:
             SSH_DIR="$SSH_DIR/"
           fi
           echo "Deploying to ssh://${SSH_USER}@${SSH_HOST}:${SSH_PORT:-22}${SSH_DIR}"
-          rsync -avz --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='vendor' --exclude='tests' --exclude='*.zip' --exclude='assets/uploads/*' -e "ssh -p ${SSH_PORT:-22}" ./ "$SSH_USER@$SSH_HOST:$SSH_DIR"
+          rsync -avz --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='vendor' --exclude='tests' --exclude='*.zip' --exclude='assets/uploads/*' -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p ${SSH_PORT:-22}" ./ "$SSH_USER@$SSH_HOST:$SSH_DIR"
