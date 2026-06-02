@@ -204,11 +204,11 @@ function send_mail(string $to, string $subject, string $html): bool
 
         $mail->send();
         $logMsg = date('Y-m-d H:i:s') . ' MAILER OK to=' . $to . ' subject=' . $subject . PHP_EOL;
-        file_put_contents(ROOT_PATH . '/mail_debug.log', $logMsg, FILE_APPEND);
+        file_put_contents('/tmp/mail_debug.log', $logMsg, FILE_APPEND);
         return true;
     } catch (\Exception $e) {
         $logMsg = date('Y-m-d H:i:s') . ' MAILER ERROR to=' . $to . ' err=' . $mail->ErrorInfo . PHP_EOL;
-        file_put_contents(ROOT_PATH . '/mail_debug.log', $logMsg, FILE_APPEND);
+        file_put_contents('/tmp/mail_debug.log', $logMsg, FILE_APPEND);
         return false;
     }
 }

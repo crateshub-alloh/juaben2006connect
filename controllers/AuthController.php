@@ -127,6 +127,7 @@ class AuthController
                 <p><a href='{$link}'>Verify your email and continue to members</a></p>
                 <p>If you did not create an account, ignore this email.</p>
             ";
+            file_put_contents('/tmp/mail_debug.log', date('Y-m-d H:i:s') . ' CALLING send_mail to=' . $email . PHP_EOL, FILE_APPEND);
             send_mail($email, 'Verify your NJOSA Alumni Portal account', $html);
         }
         $profileFields = [
