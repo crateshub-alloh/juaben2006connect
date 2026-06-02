@@ -203,9 +203,12 @@ function send_mail(string $to, string $subject, string $html): bool
         $mail->Body    = $html;
 
         $mail->send();
+        $logMsg = date('Y-m-d H:i:s') . ' MAILER OK to=' . $to . ' subject=' . $subject . PHP_EOL;
+        file_put_contents(ROOT_PATH . '/mail_debug.log', $logMsg, FILE_APPEND);
         return true;
     } catch (\Exception $e) {
-        error_log('Mailer error: ' . $mail->ErrorInfo);
+        $logMsg = date('Y-m-d H:i:s') . ' MAILER ERROR to=' . $to . ' err=' . $mail->ErrorInfo . PHP_EOL;
+        file_put_contents(ROOT_PATH . '/mail_debug.log', $logMsg, FILE_APPEND);
         return false;
     }
 }
