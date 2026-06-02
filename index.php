@@ -77,6 +77,7 @@ $routes = [
 
         // Temporary mail debug – remove after fixing email
         '/debug-mail'          => fn() => debugMail(),
+        '/debug-env'           => fn() => debugEnv(),
     ],
     'POST' => [
         '/login'               => fn() => (new AuthController)->login(),
@@ -500,6 +501,25 @@ function memberDelete(): void
         flash('error', 'Unable to delete this user.', 'error');
     }
     redirect('/executive/members');
+}
+
+function debugEnv(): void
+{
+    header('Content-Type: text/plain');
+    echo 'APP_ENV=' . APP_ENV . PHP_EOL;
+    echo 'SMTP_HOST=' . SMTP_HOST . PHP_EOL;
+    echo 'SMTP_USER=' . SMTP_USER . PHP_EOL;
+    echo 'PHP_VERSION=' . PHP_VERSION . PHP_EOL;
+    echo 'sys_get_temp_dir=' . sys_get_temp_dir() . PHP_EOL;
+    $paths = ['/tmp/', sys_get_temp_dir() . '/', ROOT_PATH . '/', '/home/u189877836/'];
+    foreach ($paths as $p) {
+        $r = @file_put_contents($p . 'wtest.txt', 'ok');
+        echo 'WRITE ' . $p . ' => ' . ($r !== false ? 'OK' : 'FAIL') . PHP_EOL;
+    }
+    // Check last registered user
+    $db = Database::getInstance();
+    $row = $db->query('SELECT id, email, is_active, email_verified_at IS NULL as unverified, created_at FROM users ORDER BY created_at DESC LIMIT 1')->fetch();
+    echo 'LAST_USER=' . json_encode($row) . PHP_EOL;
 }
 
 // Temporary SMTP debug — remove after email is confirmed working
