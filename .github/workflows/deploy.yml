@@ -49,14 +49,12 @@ jobs:
           echo "Key last line: $(tail -1 ~/.ssh/deploy_key)"
           ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null && echo "Key validation: OK" || echo "Key validation: FAILED"
 
-      - name: Add SSH host to known_hosts
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
+      - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "UserKnownHostsFile /dev/null" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       - name: Test SSH connectivity
         env:
@@ -66,7 +64,7 @@ jobs:
           SSH_PORT: ${{ secrets.SSH_PORT }}
         run: |
           echo "Testing SSH connection to ${SSH_USER}@${SSH_HOST}:${SSH_PORT:-22}"
-          ssh -i ~/.ssh/deploy_key -p ${SSH_PORT:-22} ${SSH_USER}@${SSH_HOST} "id; whoami; pwd; echo '--- ls target dir ---'; ls -la \"${SSH_DIR}\" || ls -la ~/; echo '--- end ---'"
+          ssh -i ~/.ssh/deploy_key -p ${SSH_PORT:-22} ${SSH_USER}@${SSH_HOST} "id; echo OK"
 
       - name: Deploy files via rsync over SSH
         env:
@@ -79,4 +77,4 @@ jobs:
             SSH_DIR="$SSH_DIR/"
           fi
           echo "Deploying to ssh://${SSH_USER}@${SSH_HOST}:${SSH_PORT:-22}${SSH_DIR}"
-          rsync -avz --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='vendor' --exclude='tests' --exclude='*.zip' --exclude='assets/uploads/*' -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p ${SSH_PORT:-22}" ./ "$SSH_USER@$SSH_HOST:$SSH_DIR"
+          rsync -avz --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='vendor' --exclude='tests' --exclude='*.zip' --exclude='assets/uploads/*' -e "ssh -i ~/.ssh/deploy_key -p ${SSH_PORT:-22}" ./ "$SSH_USER@$SSH_HOST:$SSH_DIR"
