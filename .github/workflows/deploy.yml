@@ -47,6 +47,16 @@ jobs:
           ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
+      - name: Test SSH connectivity
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_DIR: ${{ secrets.SSH_DIR }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          echo "Testing SSH connection to ${SSH_USER}@${SSH_HOST}:${SSH_PORT:-22}"
+          ssh -i ~/.ssh/deploy_key -p ${SSH_PORT:-22} ${SSH_USER}@${SSH_HOST} "id; whoami; pwd; echo '--- ls target dir ---'; ls -la \"${SSH_DIR}\" || ls -la ~/; echo '--- end ---'"
+
       - name: Deploy files via rsync over SSH
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
