@@ -37,11 +37,17 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           if [ -n "$SSH_PRIVATE_KEY_B64" ]; then
+            echo "Using SSH_PRIVATE_KEY_B64"
             printf '%s' "$SSH_PRIVATE_KEY_B64" | base64 --decode > ~/.ssh/deploy_key
           else
+            echo "Using SSH_PRIVATE_KEY (fallback)"
             printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           fi
           chmod 600 ~/.ssh/deploy_key
+          echo "Key file size: $(wc -c < ~/.ssh/deploy_key) bytes"
+          echo "Key first line: $(head -1 ~/.ssh/deploy_key)"
+          echo "Key last line: $(tail -1 ~/.ssh/deploy_key)"
+          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null && echo "Key validation: OK" || echo "Key validation: FAILED"
 
       - name: Add SSH host to known_hosts
         env:
