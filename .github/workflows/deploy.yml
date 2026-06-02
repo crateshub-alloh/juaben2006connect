@@ -33,9 +33,14 @@ jobs:
       - name: Save SSH private key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_B64: ${{ secrets.SSH_PRIVATE_KEY_B64 }}
         run: |
           mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          if [ -n "$SSH_PRIVATE_KEY_B64" ]; then
+            printf '%s' "$SSH_PRIVATE_KEY_B64" | base64 --decode > ~/.ssh/deploy_key
+          else
+            printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          fi
           chmod 600 ~/.ssh/deploy_key
 
       - name: Add SSH host to known_hosts
