@@ -25,22 +25,24 @@ jobs:
           fi
           echo "FTP secrets present"
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: ${{ endsWith(secrets.FTP_SERVER_DIR, '/') && secrets.FTP_SERVER_DIR || format('{0}/', secrets.FTP_SERVER_DIR) }}
-          # optional: set FTP port/protocol via secrets if your host requires it
-          port: ${{ secrets.FTP_PORT }}
-          protocol: ${{ secrets.FTP_PROTOCOL }}
-          exclude: |
-            .git*
-            .github/*
-            node_modules
-            vendor
-            tests
-            *.zip
-            assets/uploads/**
+      - name: Deploy via SFTP (lftp)
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASS: ${{ secrets.SFTP_PASS }}
+          SFTP_DIR: ${{ secrets.SFTP_DIR }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+        run: |
+          if [ -z "$SFTP_HOST" ] || [ -z "$SFTP_USER" ] || [ -z "$SFTP_PASS" ] || [ -z "$SFTP_DIR" ]; then
+            echo "ERROR: Missing one or more SFTP secrets. Required: SFTP_HOST, SFTP_USER, SFTP_PASS, SFTP_DIR"
+            exit 1
+          fi
+          sudo apt-get update -y
+          sudo apt-get install -y lftp
+          # normalize directory to end with '/'
+          if [[ "$SFTP_DIR" != */ ]]; then
+            SFTP_DIR="$SFTP_DIR/"
+          fi
+          echo "Deploying to sftp://${SFTP_HOST}:${SFTP_PORT:-22}${SFTP_DIR}"
+          # run mirror upload (reverse) while excluding uploads and dev files
+          lftp -u "$SFTP_USER","$SFTP_PASS" -p "${SFTP_PORT:-22}" sftp://"$SFTP_HOST" -e "set ssl:verify-certificate false; mirror -R --parallel=4 --delete --verbose --exclude-glob .git* --exclude-glob .github/* --exclude-glob node_modules --exclude-glob vendor --exclude-glob tests --exclude-glob '*.zip' --exclude-glob 'assets/uploads/*' ./ '$SFTP_DIR' ; bye"
